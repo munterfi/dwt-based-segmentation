@@ -46,7 +46,7 @@ knitr::include_graphics("figs/flowchart.png")
 
 ```{r, warning = FALSE, message = FALSE}
 # Reading the input file (speed and annotations)
-rawData <- readr::read_csv("data/Turkey-Vulture-Steamhouse 2.csv")
+rawData <- readr::read_csv("data/Turkey-Vulture-Steamhouse2.csv")
 nanIdx <- which(is.na(rawData$computedSpeed))
 speed <- rawData$computedSpeed
 states <- rawData$http...vocabulary.movebank.org.extended.raptor.workshop.attributes.migration.state
