@@ -33,7 +33,7 @@ cat("\014")
 
 # Background
 Method description and flowchart by @Soleymani:
-
+ 
 "In Step 1, the movement parameter profile (i.e. time series of the chosen movement parameter; speed in our example) is calculated from the raw movement data, acting as the input for the DWT transform. In Step 2, the movement signal is decomposed by the DWT. This transformation yields two outputs: low frequency approximation sub- bands (3a) and high frequency detail sub-bands (3b). These two resulting sets of sub-bands will be used for different purposes in the next stage and therefore the procedure bifurcates into two different branches, along which different analyses will be performed. Peak analysis will be performed on approximation sub-bands (Step 4a) in order to obtain behavioural segments (Step 5a), while thresholding of detail sub-bands (Step 4b) will be used to detect behavioural change points (Step 5b)."
 
 ```{r, out.width = '50%', fig.align='center', echo = FALSE}
@@ -121,7 +121,7 @@ title("Signal and detail sub-bands", outer=TRUE)
 
 # Behavioural segmentation using the approximation sub-bands
 ## Peak analysis
-Visual inspection of the different approximation sub-bands shows that Level 8 can be an appropriate level in this case because peaks are adequately distinguished from the rest of the signal indicating periodic patterns. (...) at the initial levels of decomposition, the localization effects are not strong enough yet to suggest differences between migration phases, which also make it impossible to apply any peak analysis. However, the localization effect is becoming stronger with increasing levels, which can be clearly seen in the resulting peaks versus flat regions at the Levels 7, 8 and 9. Therefore, the goal is to reach a level where segments related to the same behaviour are expressed in peaks with similar height and widths. Accordingly, level 8 was finally chosen because distinct phases became apparent as the level where peak analysis can potentially distinguish between different segments. (...) The user is recommended to carefully inspect the variation of the resulting peaks and choose the level, as well as peak height, where he/she thinks that it would work best to distinguish among different phases in the data" [@Soleymani].
+"Visual inspection of the different approximation sub-bands shows that Level 8 can be an appropriate level in this case because peaks are adequately distinguished from the rest of the signal indicating periodic patterns. (...) at the initial levels of decomposition, the localization effects are not strong enough yet to suggest differences between migration phases, which also make it impossible to apply any peak analysis. However, the localization effect is becoming stronger with increasing levels, which can be clearly seen in the resulting peaks versus flat regions at the Levels 7, 8 and 9. Therefore, the goal is to reach a level where segments related to the same behaviour are expressed in peaks with similar height and widths. Accordingly, level 8 was finally chosen because distinct phases became apparent as the level where peak analysis can potentially distinguish between different segments. (...) The user is recommended to carefully inspect the variation of the resulting peaks and choose the level, as well as peak height, where he/she thinks that it would work best to distinguish among different phases in the data" [@Soleymani].
 
 For this step the function `findpeaks()` has to be loaded. The function is a modification a function from the `pracma` package to get the same outputs as the original `findpeaks()` function from MatLab returns.
 
@@ -344,7 +344,7 @@ for (i in 2:nrow(segments)) {
 ```
 
 ## Results
-Same as for the approximation sub-bands, the user is recommended to carefully inspect the variation of the resulting detail sub-bands and choose the level where he/she hypothesizes that different phases in the data are consistent with biological knowledge of the system. Setting the threshold for identifying change points is also dependent on the extent to which finer-scale changes are to be recovered. The concatenation step is totally optional, with the length of segments for concatenation be specified by considering a minimum duration for the patterns of interest. That is in our case, a migration period cannot be shorter than 20 days. Therefore 500 fixes (indicating 20 days) were considered as the minimum length where all the migratory patterns as well as some additional segments were identified" [@Soleymani].
+"Same as for the approximation sub-bands, the user is recommended to carefully inspect the variation of the resulting detail sub-bands and choose the level where he/she hypothesizes that different phases in the data are consistent with biological knowledge of the system. Setting the threshold for identifying change points is also dependent on the extent to which finer-scale changes are to be recovered. The concatenation step is totally optional, with the length of segments for concatenation be specified by considering a minimum duration for the patterns of interest. That is in our case, a migration period cannot be shorter than 20 days. Therefore 500 fixes (indicating 20 days) were considered as the minimum length where all the migratory patterns as well as some additional segments were identified" [@Soleymani].
 
 ```{r}
 # Figure 6
