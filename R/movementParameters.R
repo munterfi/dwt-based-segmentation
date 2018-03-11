@@ -7,6 +7,9 @@
 #' @return Matrix of movement parameters
 #' @export
 #'
+#' @note The original MatLab version on this function stems from the Soleymani et al. (2017).
+#' @author M. Unterfinger (Department of Geography, University of Zurich)
+#' 
 #' @examples
 #' movementParameters(xCoord, yCoord, tCoord)
 movementParameters <- function(xCoord, yCoord, tCoord) {

@@ -6,12 +6,10 @@
 #' Input method is 1 or 2. Default is 1.
 #' Method 1 uses plane approximation,
 #' only for points within several tens of kilometers (angles in rads):
-#' d =
-#' sqrt(R_equator^2*(lag1-lag2)^2 + R_polar^2*(lon1-lon2)^2*cos((lag1+lag2)/2)^2)
+#' \code{d = sqrt(R_equator^2*(lag1-lag2)^2 + R_polar^2*(lon1-lon2)^2*cos((lag1+lag2)/2)^2)}
 #' Method 2 calculates sphereic geodesic distance for points farther apart,
 #' but ignores flattening of the earth:
-#' d =
-#' R_aver * acos(cos(lag1)cos(lag2)cos(lon1-lon2)+sin(lag1)sin(lag2))
+#' \code{d = R_aver * acos(cos(lag1)cos(lag2)cos(lon1-lon2)+sin(lag1)sin(lag2))}
 #' Flora Sun, University of Toronto, Jun 12, 2004.
 #'
 #' @param lag1 Numeric skalar in degrees
@@ -22,6 +20,9 @@
 #'
 #' @return Dist in km, or -99999 if input argument(s) is/are incorrect.
 #' @export
+#' 
+#' @note The original MatLab version on this function stems from the Soleymani et al. (2017).
+#' @author M. Unterfinger (Department of Geography, University of Zurich)
 #'
 #' @examples
 #' pos2dist(lag1,lon1,lag2,lon2,method=1)

@@ -1,5 +1,3 @@
-#' Find peaks
-#' 
 #' Find peaks (maxima) in a time series.
 #'
 #' @param x numerical vector taken as a time series
@@ -21,7 +19,8 @@
 #' 
 #' @note The original version on this function stems from the \code{pracma} package,
 #' but this version provides the same output as the original matlab version.
-#'
+#' @author M. Unterfinger (Department of Geography, University of Zurich)
+#' 
 #' @examples
 #' findpeaks(x)
 findpeaks <- function(x,nups = 1, ndowns = nups, zero = "0", peakpat = NULL, 

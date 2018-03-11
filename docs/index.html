@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Merlin Unterfinger" />
+<meta name="author" content="Merlin Unterfinger – Department of Geography, University of Zurich" />
 
 <meta name="date" content="2018-03-11" />
 
@@ -274,7 +274,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">DWT-based segmentation on trajectories of turkey vultures</h1>
-<h4 class="author"><em>Merlin Unterfinger</em></h4>
+<h4 class="author"><em>Merlin Unterfinger – Department of Geography, University of Zurich</em></h4>
 <h4 class="date"><em>2018-03-11</em></h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
@@ -298,7 +298,7 @@ text-align: justify}
 <h1>Data set</h1>
 <p>“We use four GPS tracks of turkey vultures (C. aura) from the interior North America population to illustrate the segmentation method on real data. As shown in Fig. 3, the migration path extends from Canada to South America across central regions of North America. These birds show several states during their annual migrations: (i) breeding areas in North America, (ii) outbound migration in the Fall from breeding areas to wintering grounds, (iii) tropical wintering grounds in South America, and (iv) return migration to breeding grounds in the Spring. The data were manually classified into the above-mentioned behavioural states (four segments) by domain experts as discussed in <span class="citation">Dodge et al. (<a href="#ref-Dodge">2014</a>)</span>” <span class="citation">(Soleymani et al. <a href="#ref-Soleymani">2017</a>)</span>. <a href="http://dx.doi.org/10.5441/001/1.46ft1k05">Download link data</a></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Reading the input file (speed and annotations)</span>
-rawData &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(<span class="st">&quot;data/Turkey-Vulture-Steamhouse 2.csv&quot;</span>)
+rawData &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(<span class="st">&quot;data/Turkey-Vulture-Steamhouse2.csv&quot;</span>)
 nanIdx &lt;-<span class="st"> </span><span class="kw">which</span>(<span class="kw">is.na</span>(rawData<span class="op">$</span>computedSpeed))
 speed &lt;-<span class="st"> </span>rawData<span class="op">$</span>computedSpeed
 states &lt;-<span class="st"> </span>rawData<span class="op">$</span>http...vocabulary.movebank.org.extended.raptor.workshop.attributes.migration.state
