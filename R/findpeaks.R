@@ -13,7 +13,7 @@
 #' @param plot logical; should de time series, peaks, their width and pominence be plotted?
 #'
 #' @return Returns a matrix where each row represents one peak found. The first column gives the height, the second the position/index where the maximum is reached,
-#' the third column is the peak width at half prominence and the forth column is the prominence.
+#' the third column is the peak width at half prominence and the forth column is the prominence. The fifth and sixth rows are the positions, where the width starts and ends.
 #' 
 #' @export
 #' 

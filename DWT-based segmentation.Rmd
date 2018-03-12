@@ -17,6 +17,8 @@ link-citations: true
 filter: pandoc-eqnos
 bibliography: References.bib
 abstract: "This script implements the procedure from Soleymani et al. (2017) for applying DWT-based segmentation on trajectories of turkey vultures in R. While the original code is written in MatLab, this is a direct portation of the MatLab code to R. Some features of MatLab are not available in R, therefore workarounds and implementations have been done, which might lead to slightly different results."
+editor_options: 
+  chunk_output_type: console
 ---
 
 <style>
