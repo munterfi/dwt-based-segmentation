@@ -26,7 +26,7 @@ text-align: justify}
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.show = 'hold')
+knitr::opts_chunk$set(echo = TRUE, fig.show = 'hold', fig.align = 'center', fig.height = 4.5, out.width = '100%')
 rm(list = ls())
 cat("\014")
 ```
@@ -46,10 +46,11 @@ knitr::include_graphics("figs/flowchart.png")
 
 ```{r, warning = FALSE, message = FALSE}
 # Reading the input file (speed and annotations)
-rawData <- readr::read_csv("data/Turkey-Vulture-Steamhouse2.csv")
-nanIdx <- which(is.na(rawData$computedSpeed))
+rawData <- readr::read_csv("data/Turkey-Vulture-Leo.csv")
+# nanIdx <- which(is.na(rawData$computedSpeed))
 speed <- rawData$computedSpeed
 states <- rawData$http...vocabulary.movebank.org.extended.raptor.workshop.attributes.migration.state
+nanIdx <- which(is.na(states))
 speed <- speed[-nanIdx]
 states <- states[-nanIdx]
 statesCh <- numeric(length(speed)) + 1
@@ -121,62 +122,38 @@ title("Signal and detail sub-bands", outer=TRUE)
 
 # Behavioural segmentation using the approximation sub-bands
 ## Peak analysis
-"Visual inspection of the different approximation sub-bands shows that Level 8 can be an appropriate level in this case because peaks are adequately distinguished from the rest of the signal indicating periodic patterns. (...) at the initial levels of decomposition, the localization effects are not strong enough yet to suggest differences between migration phases, which also make it impossible to apply any peak analysis. However, the localization effect is becoming stronger with increasing levels, which can be clearly seen in the resulting peaks versus flat regions at the Levels 7, 8 and 9. Therefore, the goal is to reach a level where segments related to the same behaviour are expressed in peaks with similar height and widths. Accordingly, level 8 was finally chosen because distinct phases became apparent as the level where peak analysis can potentially distinguish between different segments. (...) The user is recommended to carefully inspect the variation of the resulting peaks and choose the level, as well as peak height, where he/she thinks that it would work best to distinguish among different phases in the data" [@Soleymani].
+"Visual inspection of the different approximation sub-bands shows that level [9] can be an appropriate level in this case because peaks are adequately distinguished from the rest of the signal indicating periodic patterns. (...) at the initial levels of decomposition, the localization effects are not strong enough yet to suggest differences between migration phases, which also make it impossible to apply any peak analysis. However, the localization effect is becoming stronger with increasing levels, which can be clearly seen in the resulting peaks versus flat regions at the Levels [8, 9 and 10]. Therefore, the goal is to reach a level where segments related to the same behaviour are expressed in peaks with similar height and widths. Accordingly, level [9] was finally chosen because distinct phases became apparent as the level where peak analysis can potentially distinguish between different segments. (...) The user is recommended to carefully inspect the variation of the resulting peaks and choose the level, as well as peak height, where he/she thinks that it would work best to distinguish among different phases in the data" [@Soleymani].
 
 For this step the function `findpeaks()` has to be loaded. The function is a modification a function from the `pracma` package to get the same outputs as the original `findpeaks()` function from MatLab returns.
 
-```{r}
+```{r fig.height=3.5}
 # Load function 'findpeaks()'
 source("R/findpeaks.R")
 
 # Finding the extremum values: in this case it is maxima
 minHeight <-  3.5
 minDist <- 1000
-aBandNumber <- 8
+aBandNumber <- 9
+npeaks <- Inf
 par(mfrow=c(1,1), mar=c(0,4,0,2)+0.1, oma=c(5,0,3,0)+0.1, xaxt='s')
-pks <- findpeaks(c(a[[aBandNumber]]), minpeakheight = minHeight, minpeakdistance = minDist, plot = TRUE)
-Pks <- pks[,1]
-PksLoc <- pks[,2]
-PksWid <- pks[,3]
-PksPro <- pks[,4]
+pks <- findpeaks(c(a[[aBandNumber]]), minpeakheight = minHeight, minpeakdistance = minDist, plot = TRUE, npeaks = npeaks)
 ```
 
 ## Segmentation based on the extents of peaks
 " ... the peaks related to migratory seasons are well distinguished from the rest of the signal and the combination of the height and the width of the peaks will help to identify the segments." [@Soleymani].
 
 ```{r}
-PksPoints <- matrix(NA, nrow(pks), 2)
-for (i in 1:nrow(pks)) {
-  widR = round(PksWid[i])
-  slot = (PksLoc[i]-widR):(PksLoc[i]+widR)
-  if (tail(slot,1) > length(a[[aBandNumber]])){
-    fend = which(slot == length(a[[aBandNumber]]))
-    slot = slot[1:fend]
-  }
-  val = Pks[i] - PksPro[i]/2 # the value of half of the height of the peak
-  z = a[[aBandNumber]][slot]
-  dist = sort(abs(a[[aBandNumber]][slot] - val))
-  l1 = which(abs(z-val) == dist[1])
-  l2 = which(abs(z-val) == dist[2])
-  for (j in 2:length(dist)) {
-    l22 = which(abs(z-val) == dist[j])
-    if (sign(slot[l1] - PksLoc[i]) != sign(slot[l22] - PksLoc[i])) {
-      l2 = l22
-      break 
-    }
-  }
-  PksPoints[i,] = sort(c(slot[l1], slot[l2]))
-}
-seg = PksPoints[1,] 
-for (i in 2:nrow(PksPoints)) {
-  seg = c(seg, PksPoints[i,])
-}
-fseg = c(1, seg, length(a[[aBandNumber]]))
-segments <- numeric(length(a[[aBandNumber]]))
-for (i in 1:length(a[[aBandNumber]])) {
-  for (j in 2:length(fseg)) {
-    segments[fseg[j-1]:fseg[j]] = j-1;
-  }
+# Take the peak with as definition for the segments,
+# pks[ ,5] is the left border and pks[ ,6] the right on,
+# at half the prominence height.
+segLims <- Reduce(c, apply(X = pks, MARGIN = 1, FUN = function(X){c(X[5], X[6])}))
+segLims <- c(segLims, length(sig))
+nSegs <- length(segLims)
+segmentNum <- nSegs
+segments <- numeric(tail(segLims,1))
+for (i in nSegs:1) {
+  segments[1:segLims[i]] <- segmentNum
+  segmentNum <- segmentNum-1
 }
 ```
 
@@ -190,17 +167,20 @@ plot(sig,
      type = "l", col = "blue",
      xlim = c(1, length(speed) + 2000),
      ylab = 'Speed(km/h)',
-     main = "a) Speed profile of Steamhouse 2")
+     main = "a) Speed profile of Leo")
 
 # Approximation sub-band and the detected peaks
 plot(a[[aBandNumber]],
      type = "l", col = "blue",
      xlim = c(1, length(speed) + 2000),
-     ylab = 'Approximation sub-band',
+     ylab = 'Approximation',
      main = paste("b) Detected peaks at approximation sub-band of level",
                   aBandNumber))
 points(pks[, 2], pks[, 1] + 0.25, pch = 25, bg = "blue")
-
+for (p in 1:nrow(pks)) {
+  lines(rep(pks[p, 2],2), c(pks[p, 1]-pks[p, 4], pks[p, 1]), col = rgb(1, 0.6, 0))
+  lines(c(pks[p, 5], pks[p, 6]), rep(pks[p, 4]/2,2), col = rgb(1, 0.6, 0))
+}
 
 # Results of segmentation based on the extents (widths) of peaks
 palette(c("red", "green3", "blue", "cyan"))
@@ -230,44 +210,46 @@ legend("topright", legend = levels(as.factor(states)),
 # Change point analysis using the detail sub-bands
 ## Choose detail sub-band
 "Since the detail sub-bands contain the high-frequency information, the analysis based on these sub-bands focuses on the detection of fine-scale changes in movement. Same as with the approximation, first the relevant level for the detail sub-bands needs to be selected. This is also done by visual inspection of the detail sub-bands and further informed by previous knowledge regarding at which level biologically-driven changes may occur. (...) at Level 5 one can start to observe the different regimes of values for migratory and non-migratory phases, as well as some finer-scale changes within these phases. Therefore level 5 is selected for further analysis" [@Soleymani].
-```{r}
+```{r fig.height=3.5}
 dBandNumber <- 5
 det <- d[[dBandNumber]]
-par(mfrow=c(1,1), mar=c(1,4,1,2)+0.1,
-    oma=c(5,0,3,0)+0.1, xaxt='s')
-plot(det,
-     type = "l",
-     col = rgb(0.2, 0.6, 0.2),
-     ylab = 'Approximation sub-band',
-     main = paste("Detail sub-band", dBandNumber))
 ```
 
 ## Initial segments based on thresholding
 "The next step is to identify change points by setting a threshold for the difference between the wavelet coefficients ... . The value of this threshold also depends on the data used. For example in this case, the detail coefficients in the non-migratory season are around zero at the selected Level 5, whereas the values in the migratory seasons are much higher. Therefore a value of 1.0 was selected to identify the change points, that is, every point whose coefficient value is 1.0 units higher than the value of its preceding point" [@Soleymani].
 
-```{r}
+```{r fig.height=3.5}
+# Set threshold
+threshold <- 1
 # Labeling based on thresholding neighboring fixes passing the threshold
-segL <- c(det[1,1], 1)
+f <- c(0, as.numeric(diff(abs(det[,1])) > threshold))
 id <- 1
-f <- as.numeric(diff(abs(det[,1])) > 1)
-f <- c(0, f)
-for (i in (2:length(det))) {
-  if (f[i] == 0) {
-    segLb <- cbind(det[i,1], id)
-  } else if (f[i] == 1 && f[i] != f[i-1]) {
-    segLb <- cbind(det[i,1], id+1)
-    id <- id+1
+segL <- do.call("rbind", lapply(X = 2:length(det), FUN = function(X){
+  if (f[X] == 0) {
+    c(det[X,1], id)
+  } else if (f[X] == 1 && f[X] != f[X-1]) {
+    assign("id", id+1, envir=parent.frame(n=2))
+    c(det[X,1], id)
   } else {
-    segLb <- cbind(det[i,1], id)
+    c(det[X,1], id)
   } 
-  segL <- rbind(segL, segLb)
-}
+}))
+segL <- rbind(c(det[1,1], 1), segL)
+
+# Plot initial segments
+par(mfrow=c(1,1), mar=c(1,4,1,2)+0.1,
+    oma=c(5,0,3,0)+0.1, xaxt='s')
+plot(det[,1],
+     type = "l",
+     col = rgb(0.2, 0.6, 0.2),
+     ylab = paste("Detail sub-band", dBandNumber))
+abline(v = which(c(0, diff(segL[,2]))==1), col = rgb(1, 0.6, 0, alpha = 0.3))
 ```
 
 ## Segmentation based on stitching the detail sub-segments
 "An optional concatenation step to obtain fine scale behavioural segments can be applied. This makes it possible to better match the results to the expected duration of the patterns that are sought (i.e. migratory patterns). In our case, all the segments with a length shorter than 500 fixes (i.e. corresponding to ~20 days) were concatenated to their preceding segment" [@Soleymani].
 
-```{r}
+```{r fig.height=3.5}
 # Detecting frequency breaks
 frqdif <- which(diff(abs(det))>1)
 frqdif <- c(frqdif, length(det))
@@ -341,6 +323,15 @@ for (i in 2:nrow(segments)) {
     segID <- segID + 1
   }
 }
+
+# Plot segments
+par(mfrow=c(1,1), mar=c(1,4,1,2)+0.1,
+    oma=c(5,0,3,0)+0.1, xaxt='s')
+plot(det[,1],
+     type = "l",
+     col = rgb(0.2, 0.6, 0.2),
+     ylab = paste("Detail sub-band", dBandNumber))
+abline(v = which(c(0, diff(segments[,3]))==1), col = rgb(1, 0.6, 0, alpha = 0.7))
 ```
 
 ## Results

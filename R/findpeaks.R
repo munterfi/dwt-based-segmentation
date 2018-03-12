@@ -64,7 +64,7 @@ findpeaks <- function(x,nups = 1, ndowns = nups, zero = "0", peakpat = NULL,
   inds <- which(xv >= minpeakheight & xv - pmax(x[x1], x[x2]) >= threshold)
   
   # combine into a matrix format
-  X <- cbind(xv[inds], xp[inds], x1[inds], x2[inds])
+  X <- cbind(xv[inds], xp[inds], x1[inds], x2[inds], x2[inds], x2[inds])
   
   # eliminate peaks that are near by
   if (minpeakdistance < 1)
@@ -131,6 +131,8 @@ findpeaks <- function(x,nups = 1, ndowns = nups, zero = "0", peakpat = NULL,
       if(x[r] < prom/2) {break}
     }
     X[p, 3] = r-l
+    X[p, 5] = l # Store left index
+    X[p, 6] = r # Store right index
     if(plot) {lines( c(l, r), rep(prom/2,2), col = rgb(1, 0.6, 0))}
   }
   return(X)
