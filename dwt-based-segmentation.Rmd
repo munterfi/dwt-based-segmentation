@@ -1,5 +1,5 @@
 ---
-title: 'DWT-based segmentation on trajectories of turkey vultures'
+title: 'Segmentation of trajectories using discrete wavelet transform'
 author: "Merlin Unterfinger – Department of Geography, University of Zurich"
 date: "`r Sys.Date()`"
 output:
@@ -16,7 +16,7 @@ biblio-style: "apalike"
 link-citations: true
 filter: pandoc-eqnos
 bibliography: References.bib
-abstract: "This script implements the procedure from Soleymani et al. (2017) for applying DWT-based segmentation on trajectories of turkey vultures in R. While the original code is written in MatLab, this is a direct portation of the MatLab code to R. Some features of MatLab are not available in R, therefore workarounds and implementations have been done, which might lead to slightly different results."
+abstract: "This script implements the procedure from Soleymani et al. (2017) for applying discrete-wavelet-transform-(DWT)-based segmentation on trajectories of turkey vultures in R. While the original code is written in MatLab, this is a direct portation of the MatLab code to R. Some features of MatLab are not available in R, therefore workarounds and implementations have been done, which might lead to slightly different results."
 editor_options: 
   chunk_output_type: console
 ---
@@ -48,26 +48,18 @@ knitr::include_graphics("figs/flowchart.png")
 
 ```{r, warning = FALSE, message = FALSE}
 # Reading the input file (speed and annotations)
-rawData <- readr::read_csv("data/Turkey-Vulture-Leo.csv")
-# nanIdx <- which(is.na(rawData$computedSpeed))
-speed <- rawData$computedSpeed
-states <- rawData$http...vocabulary.movebank.org.extended.raptor.workshop.attributes.migration.state
-nanIdx <- which(is.na(states))
-speed <- speed[-nanIdx]
-states <- states[-nanIdx]
-statesCh <- numeric(length(speed)) + 1
+rawData <- read.csv2("data/Turkey-Vulture-Leo.csv", sep = ",")
+speed <- as.numeric(as.character(rawData[,35]))
+states <- rawData[,12]
 
-# Check for empty strings
-for (i in 2:length(states))
-{
-  if (states[i] == '') {
-    states[i]=states[i-1]
-  }
-  statesCh[i] = states[i] == states[i-1]
+# Check for emtpy states and assign them the following
+for(i in which(states == '')) {
+  t <- i; while(states[t] == ''){t <- t + 1}
+  states[i] <- states[t]
 }
-statesChange=which(statesCh==0)
-statesLen = c(statesChange[1]-1, diff(statesChange),
-              length(states)-tail(statesChange,1))
+states <- droplevels(states) # update factor levels
+
+# Create x axis for plotting
 tt = seq(1, length(speed))
 
 # Plotting step length profile versus annotations
@@ -81,11 +73,11 @@ plot(speed,
 plot(speed,
      type = "p", pch=16,
      xlim=c(1, length(speed)+2000),
-     col = as.factor(states),
+     col = states,
      ylab = 'Speed(km/h)',
      main = "Annotation data")
-legend("topright", legend=levels(as.factor(states)),
-       pch=16, pt.cex=1, cex = 0.5, col=unique(as.factor(states)))
+legend("topright", legend=levels(states),
+       pch=16, pt.cex=1, cex = 0.5, col=unique(states))
 ```
 
 # Discrete wavlet transform
@@ -129,32 +121,36 @@ title("Signal and detail sub-bands", outer=TRUE)
 For this step the function `findpeaks()` has to be loaded. The function is a modification a function from the `pracma` package to get the same outputs as the original `findpeaks()` function from MatLab returns.
 
 ```{r fig.height=3.5}
+# Choose approximation sub-band
+aBandNumber <- 9
+app <- c(a[[aBandNumber]])
+
 # Load function 'findpeaks()'
 source("R/findpeaks.R")
 
 # Finding the extremum values: in this case it is maxima
 minHeight <-  3.5
 minDist <- 1000
-aBandNumber <- 9
 npeaks <- Inf
 par(mfrow=c(1,1), mar=c(0,4,0,2)+0.1, oma=c(5,0,3,0)+0.1, xaxt='s')
-pks <- findpeaks(c(a[[aBandNumber]]), minpeakheight = minHeight, minpeakdistance = minDist, plot = TRUE, npeaks = npeaks)
+pks <- findpeaks(app, minpeakheight = minHeight,
+                 minpeakdistance = minDist, plot = TRUE, npeaks = npeaks)
 ```
 
 ## Segmentation based on the extents of peaks
 " ... the peaks related to migratory seasons are well distinguished from the rest of the signal and the combination of the height and the width of the peaks will help to identify the segments." [@Soleymani].
 
 ```{r}
-# Take the peak with as definition for the segments,
-# pks[ ,5] is the left border and pks[ ,6] the right on,
-# at half the prominence height.
+# Use the peak width to define the trajectory segments,
+# pks[ ,5] is the left and pks[ ,6] the right border,
+# of the peak at half the prominence's height.
 segLims <- Reduce(c, apply(X = pks, MARGIN = 1, FUN = function(X){c(X[5], X[6])}))
 segLims <- c(segLims, length(sig))
 nSegs <- length(segLims)
 segmentNum <- nSegs
-segments <- numeric(tail(segLims,1))
+segmentsApp <- numeric(tail(segLims,1))
 for (i in nSegs:1) {
-  segments[1:segLims[i]] <- segmentNum
+  segmentsApp[1:segLims[i]] <- segmentNum
   segmentNum <- segmentNum-1
 }
 ```
@@ -172,7 +168,7 @@ plot(sig,
      main = "a) Speed profile of Leo")
 
 # Approximation sub-band and the detected peaks
-plot(a[[aBandNumber]],
+plot(app,
      type = "l", col = "blue",
      xlim = c(1, length(speed) + 2000),
      ylab = 'Approximation',
@@ -189,30 +185,31 @@ palette(c("red", "green3", "blue", "cyan"))
 plot(speed,
      type = "p", pch = 16,
      xlim = c(1, length(speed) + 2000),
-     col = as.factor(segments),
+     col = as.factor(segmentsApp),
      ylab = 'Speed(km/h)',
      main = "c) Segmentation results based on DWT")
 legend("topright",
-       legend = levels(as.factor(segments)),
+       legend = levels(as.factor(segmentsApp)),
        pch = 16, pt.cex = 1, cex = 0.5,
-       col = unique(as.factor(segments)))
+       col = unique(as.factor(segmentsApp)))
 
 # Annotations
 plot(speed,
      type = "p", pch = 16,
      xlim = c(1, length(speed) + 2000),
-     col = as.factor(states),
+     col = states,
      xlab = 'Years', ylab = 'Speed(km/h)',
      main = "d) Annotated data")
-legend("topright", legend = levels(as.factor(states)),
+legend("topright", legend = levels(states),
        pch = 16, pt.cex = 1, cex = 0.5,
-       col = unique(as.factor(states)))
+       col = unique(states))
 ```
 
 # Change point analysis using the detail sub-bands
 ## Choose detail sub-band
 "Since the detail sub-bands contain the high-frequency information, the analysis based on these sub-bands focuses on the detection of fine-scale changes in movement. Same as with the approximation, first the relevant level for the detail sub-bands needs to be selected. This is also done by visual inspection of the detail sub-bands and further informed by previous knowledge regarding at which level biologically-driven changes may occur. (...) at Level 5 one can start to observe the different regimes of values for migratory and non-migratory phases, as well as some finer-scale changes within these phases. Therefore level 5 is selected for further analysis" [@Soleymani].
 ```{r fig.height=3.5}
+# Choose detail sub-band
 dBandNumber <- 5
 det <- d[[dBandNumber]]
 ```
@@ -223,20 +220,20 @@ det <- d[[dBandNumber]]
 ```{r fig.height=3.5}
 # Set threshold
 threshold <- 1
-# Labeling based on thresholding neighboring fixes passing the threshold
-f <- c(0, as.numeric(diff(abs(det[,1])) > threshold))
-id <- 1
-segL <- do.call("rbind", lapply(X = 2:length(det), FUN = function(X){
-  if (f[X] == 0) {
-    c(det[X,1], id)
-  } else if (f[X] == 1 && f[X] != f[X-1]) {
-    assign("id", id+1, envir=parent.frame(n=2))
-    c(det[X,1], id)
-  } else {
-    c(det[X,1], id)
-  } 
+
+# Detecting frequency breaks
+frqdif <- c(which(diff(abs(det)) > threshold), length(det))
+
+# Split into inital segements based on the threshold above
+splitAt <- function(x, pos) unname(split(x, cumsum(seq_along(x) %in% pos)))
+segList <- splitAt(det, frqdif)
+
+# Labeling inital segments
+id <- 0
+segmentsDet <- Reduce(c, lapply(X = segList, FUN = function(X) {
+  assign("id", id+1, envir=parent.frame(n=2))
+  rep(id, length(X))
 }))
-segL <- rbind(c(det[1,1], 1), segL)
 
 # Plot initial segments
 par(mfrow=c(1,1), mar=c(1,4,1,2)+0.1,
@@ -245,95 +242,37 @@ plot(det[,1],
      type = "l",
      col = rgb(0.2, 0.6, 0.2),
      ylab = paste("Detail sub-band", dBandNumber))
-abline(v = which(c(0, diff(segL[,2]))==1), col = rgb(1, 0.6, 0, alpha = 0.3))
+abline(v = which(c(0, diff(segmentsDet))==1), col = rgb(1, 0.6, 0, alpha = 0.2))
 ```
 
 ## Segmentation based on stitching the detail sub-segments
 "An optional concatenation step to obtain fine scale behavioural segments can be applied. This makes it possible to better match the results to the expected duration of the patterns that are sought (i.e. migratory patterns). In our case, all the segments with a length shorter than 500 fixes (i.e. corresponding to ~20 days) were concatenated to their preceding segment" [@Soleymani].
 
 ```{r fig.height=3.5}
-# Detecting frequency breaks
-frqdif <- which(diff(abs(det))>1)
-frqdif <- c(frqdif, length(det))
-
-# Detecting the initial segments based on thresholding
-seg <- list()
-seg[[1]] <- det[1:frqdif[1]]
-for (j in 2:length(frqdif)) {
-  if (frqdif[j]-frqdif[j-1]==1) {
-    seg[[j]] <- det[frqdif[j]]
-  } else {
-    seg[[j]] <- det[(frqdif[j-1]+1):frqdif[j]]
-  }
-}
-
 # Removing short segments (i.e. <500 fixes)
-seglen <- sapply(seg, length)
-segLongInd <- which(seglen>500)
+lengthLimit <- 500
 
-# Concatenating the segments
-segs1 <- list()
-segs2 <- list()
-for (p in 1:(length(segLongInd)-1)) {
-  sumLen1 <- seglen[segLongInd[p]]
-  ids1 <- p*(numeric(sumLen1)+1)
-  segs1[[p]] <- cbind(seg[[segLongInd[p]]], ids1)
-  sumLen2 <- seglen[segLongInd[p]+1]
-  segsBTW <- seg[[(segLongInd[p]+1)]]
-  from <- (segLongInd[p]+2)
-  to <- (segLongInd[p+1]-1)
-  if (from <= to) {
-    for (q in from:to) {
-      sumLen2 <- sumLen2+seglen[q]
-      segsBTW <- c(segsBTW, seg[[q]])
-    }
-  }
-  ids2 <- (p+50)*(numeric(sumLen2)+1)
-  segs2[[p]] <- cbind(segsBTW, ids2)
-  if (length(segs2[[p]])<100) {
-    ids2=p*((numeric(sumLen2))+1)
-    segs1[[p]] <- rbind(segs1[[p]], cbind(segsBTW, ids2))
-    segs2[[p]] <- numeric(0)
-  }
-}
-segsEnd <- seg[[segLongInd[p+1]]]
-sumLenEnd <- seglen[segLongInd[p+1]]
-from <- (segLongInd[p+1]+1)
-to <- (length(seg))
-if (from <= to) {
-  for (k in from:to) {
-    sumLenEnd <- sumLenEnd+seglen[k]
-    segsEnd <- c(segsEnd, seg[[k]])
-  }
-}
-idsEnd <- (p+1)*(numeric(sumLenEnd)+1)
-segs1[[p+1]] <- cbind(segsEnd, idsEnd)
-segs2[[p+1]] <- numeric(0)
-segments <- rbind(segs1[[1]], segs2[[1]])
-for (m in 2:length(segs1)) {
-  segNext <- rbind(segs1[[m]], segs2[[m]])
-  segments <- rbind(segments, segNext)
-}
-segments <- cbind(segments, numeric(nrow(segments)))
-segments[1,3] <- 1
-for (i in 2:nrow(segments)) {
-  segID <- segments[i-1,3]
-  if (segments[i,2] == segments[i-1,2]) {
-    segments[i,3] <- segID
+# Concatenate and label the segments
+segmentsDetCon <- numeric(0)
+id <- 0; vecInd <- 1;
+for (i in 1:length(segList)){
+  if(length(segList[[i]]) >= lengthLimit) {
+    id <- id + 1
+    segmentsDetCon <- c(segmentsDetCon, rep(id, length(segList[[i]])))
+    id <- id + 1
   } else {
-    segments[i,3] <- segments[i-1,3] + 1
-    segID <- segID + 1
+    segmentsDetCon <- c(segmentsDetCon, rep(id, length(segList[[i]])))
   }
 }
 
-# Plot segments
+# Plot concatenated segments
 par(mfrow=c(1,1), mar=c(1,4,1,2)+0.1,
     oma=c(5,0,3,0)+0.1, xaxt='s')
 plot(det[,1],
      type = "l",
      col = rgb(0.2, 0.6, 0.2),
      ylab = paste("Detail sub-band", dBandNumber))
-abline(v = which(c(0, diff(segments[,3]))==1), col = rgb(1, 0.6, 0, alpha = 0.7))
+abline(v = which(c(0, diff(segmentsDetCon))==1), col = rgb(1, 0.6, 0, alpha = 1))
 ```
 
 ## Results
@@ -348,18 +287,18 @@ par(mfrow=c(4,1), mar=c(1,4,1,2)+0.1,
 plot(tt, det,
      type = "p", pch=16,
      xlim=c(1, length(speed)+2000),
-     col = as.factor(states), 
+     col = states, 
      ylab = 'Detail sub-band', 
      main = "a) Detail sub-bands over the annotated states")
-legend("topright", legend=levels(as.factor(states)),
-       pch=16, pt.cex=1, cex = 0.5, col=unique(as.factor(states)))
+legend("topright", legend=levels(states),
+       pch=16, pt.cex=1, cex = 0.5, col=unique(states))
 lines(tt, det)
 
 # Plotting initial segments based on thresholding
 plot(tt, speed,
      type = "p", pch=16,
      xlim=c(1, length(speed)+2000),
-     col = as.factor(segL[,2]),
+     col = as.factor(segmentsDet),
      ylab = 'Speed(km/h)', xlab = 'Years',
      main = "b) Initial segments based on thresholding")
 
@@ -367,7 +306,7 @@ plot(tt, speed,
 plot(tt, speed,
      type = "p", pch=16,
      xlim=c(1, length(speed)+2000),
-     col = as.factor(segments[,3]),
+     col = as.factor(segmentsDetCon),
      ylab = 'Speed(km/h)',
      main = "c) Segmentation based on stitching the detail sub-segments")
 
@@ -375,11 +314,11 @@ plot(tt, speed,
 plot(tt, speed,
      type = "p", pch=16,
      xlim=c(1, length(speed)+2000),
-     col = as.factor(states),
+     col = states,
      xlab = 'Years', ylab = 'Speed(km/h)',
      main = "d) Annotated data")
-legend("topright", legend=levels(as.factor(states)),
-       pch=16, pt.cex=1, cex = 0.5, col=unique(as.factor(states)))
+legend("topright", legend=levels(states),
+       pch=16, pt.cex=1, cex = 0.5, col=unique(states))
 ```
 
 # References
