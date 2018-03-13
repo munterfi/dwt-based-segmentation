@@ -2,7 +2,7 @@
 This repository implements the procedure from Soleymani et al. (2017) for applying a DWT-based segmentation on trajectories of turkey vultures in R.
 
 * See [here](https://munterfinger.github.io/dwt-based-segmentation/) for the R code and a detailed description.
-* See [here](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12755/abstract) for the original MatLab version by Soleymani et al. (2017).
+* See [here](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12755/abstract) for the article by Soleymani et al. (2017).
 * See [here](http://dx.doi.org/10.5441/001/1.46ft1k05) for the tracking data of the turkey vultures by Dodge et al. (2014).
 
 |![](figs/a9_result.png)|![](figs/d5_result.png)|

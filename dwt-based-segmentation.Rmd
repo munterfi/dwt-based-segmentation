@@ -16,7 +16,7 @@ biblio-style: "apalike"
 link-citations: true
 filter: pandoc-eqnos
 bibliography: References.bib
-abstract: "This script implements the procedure from Soleymani et al. (2017) for applying discrete-wavelet-transform-(DWT)-based segmentation on trajectories of turkey vultures in R. While the original code is written in MatLab, this is a direct portation of the MatLab code to R. Some features of MatLab are not available in R, therefore workarounds and implementations have been done, which might lead to slightly different results."
+abstract: "This script implements the procedure from Soleymani et al. (2017) for applying discrete-wavelet-transform-(DWT)-based segmentation on trajectories of turkey vultures in R. While the original code is written in MatLab, this is not (!) a direct portation of the MatLab code to R. Some features of MatLab are missing in R, therefore workarounds and implementations have been made. The results are comparable with the original, but the setting of the parameters is slightly different to get optimal segmentations. It is recommended to visually assess the segmentations and adjust the parameters appropriately."
 editor_options: 
   chunk_output_type: console
 ---
