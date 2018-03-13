@@ -1,17 +1,17 @@
 # Discrete Wavelet Transform based Segmentation of Trajectories
 This repository implements the procedure from Soleymani et al. (2017) for applying a DWT-based segmentation on trajectories of turkey vultures in R.
 
-* See [here](https://munterfinger.github.io/dwt-based-segmentation/) for the R code and a detailed description.
-* See [here](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12755/abstract) for the article by Soleymani et al. (2017).
-* See [here](http://dx.doi.org/10.5441/001/1.46ft1k05) for the tracking data of the turkey vultures by Dodge et al. (2014).
+* [Documentation](https://munterfinger.github.io/dwt-based-segmentation/) of the R code
+* [Article](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12755/abstract) by Soleymani et al. (2017)
+* [Tracking data](http://dx.doi.org/10.5441/001/1.46ft1k05) of the turkey vultures (Leo) by Dodge et al. (2014)
 
 |![](figs/a9_result.png)|![](figs/d5_result.png)|
 |---|---|
 
 ## Prerequisites
 
-* [R](https://www.r-project.org/) – R is a free software environment for statistical computing and graphics.
-* [RStudio](https://www.rstudio.com/) – Open source and enterprise-ready professional software for R.
+* [R](https://www.r-project.org/) – R is a free software environment for statistical computing and graphics
+* [RStudio](https://www.rstudio.com/) – Open source and enterprise-ready professional software for R
 
 ## Author
 

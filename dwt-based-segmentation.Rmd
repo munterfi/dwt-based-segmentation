@@ -44,7 +44,7 @@ knitr::include_graphics("figs/flowchart.png")
 
 # Data set
 "We use four GPS tracks of turkey vultures (C. aura) from the interior North America population to illustrate the segmentation method on real data. As shown in Fig. 3, the migration path extends from Canada to South America across central regions of North America. These birds show several states during their annual migrations: (i) breeding areas in North America, (ii) outbound migration in the Fall from breeding areas to wintering grounds, (iii) tropical wintering grounds in South America, and (iv) return migration to breeding grounds in the Spring. The data were manually classified into the above-mentioned behavioural states (four segments) by domain experts as discussed in @Dodge" [@Soleymani].
-[Download link data](http://dx.doi.org/10.5441/001/1.46ft1k05)
+[Download data](http://dx.doi.org/10.5441/001/1.46ft1k05)
 
 ```{r, warning = FALSE, message = FALSE}
 # Reading the input file (speed and annotations)
