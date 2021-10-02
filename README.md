@@ -1,7 +1,7 @@
 # Discrete Wavelet Transform based Segmentation of Trajectories
 This repository implements the procedure from Soleymani et al. (2017) for applying a DWT-based segmentation on trajectories of turkey vultures in R.
 
-* [Documentation](https://munterfinger.github.io/dwt-based-segmentation/) of the R code
+* [Documentation](https://munterfi.github.io/dwt-based-segmentation/) of the R code
 * [Article](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12755/abstract) by Soleymani et al. (2017)
 * [Tracking data](http://dx.doi.org/10.5441/001/1.46ft1k05) of the turkey vultures (Leo) by Dodge et al. (2014)
 
@@ -15,7 +15,7 @@ This repository implements the procedure from Soleymani et al. (2017) for applyi
 
 ## Author
 
-* **Merlin Unterfinger** – [munterfinger](https://github.com/munterfinger)
+* **Merlin Unterfinger** – [munterfi](https://github.com/munterfi)
 
 ## References
 Dodge, G. Bohrer, K. Bildstein, S. C. Davidson, R. Weinzierl, M. J. Bechard, D. Barber, et al. 2014. “Environmental drivers of variability in the movement ecology of turkey vultures (Cathartes aura) in North and South America.” Philosophical Transactions of the Royal Society B: Biological Sciences 369 (1643): 20130195–5. doi:10.1098/rstb.2013.0195.
